@@ -1,7 +1,6 @@
 package tests
 
 import io.qameta.allure.Description
-import io.qameta.allure.Issue
 import io.qameta.allure.Severity
 import io.qameta.allure.SeverityLevel.NORMAL
 import org.hamcrest.MatcherAssert
@@ -11,15 +10,12 @@ import org.junit.jupiter.api.Test
 import steps.YandexWeatherStep
 import java.util.*
 
-private const val KEY = "" //X-Yandex-API-Key
-
 @DisplayName("Weather Handler Errors Testing")
 class WeatherHandlerErrorsTest {
 
-    @DisplayName("Test-")
+    @DisplayName("Access denied with custom key")
     @Test
-    @Issue("Weather project 000")
-    @Description("Access denied with custom key")
+    @Description("Checking handler when we don't have access")
     @Severity(NORMAL)
     fun getWeatherPredictionAccessDenied() {
 
@@ -34,10 +30,9 @@ class WeatherHandlerErrorsTest {
         )
     }
 
-    @DisplayName("Test-")
+    @DisplayName("Geolocation not found")
     @Test
-    @Issue("Weather project 000")
-    @Description("Geolocation not found")
+    @Description("We try to request with impossible coordinates")
     @Severity(NORMAL)
     fun getWeatherPredictionGeolocationNotFound() {
 
@@ -47,7 +42,7 @@ class WeatherHandlerErrorsTest {
         )
 
         val api = YandexWeatherStep.getWeather()
-        val response = api.getWeatherPrediction(key = KEY, params = params).execute()
+        val response = api.getWeatherPrediction(params = params).execute()
 
         MatcherAssert.assertThat(
             "check that we get Not Found error",

@@ -3,7 +3,6 @@ package tests
 import helpers.AllureHelpers.step
 import io.qameta.allure.Allure.step
 import io.qameta.allure.Description
-import io.qameta.allure.Issue
 import io.qameta.allure.Severity
 import io.qameta.allure.SeverityLevel.NORMAL
 import org.hamcrest.MatcherAssert.assertThat
@@ -12,38 +11,35 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import steps.YandexWeatherStep
-
-private const val KEY = "" //X-Yandex-API-Key
+import java.time.LocalDate
 
 @DisplayName("Weather Handler Testing")
 class WeatherHandlerTest {
 
-    @DisplayName("Test-001")
+    @DisplayName("Default location based on your ip")
     @Test
-    @Issue("Weather project 001")
-    @Description("Default location based on your ip")
+    @Description("Prediction based on ip of client which makes request")
     @Severity(NORMAL)
     fun getWeatherPredictionDefaultLocation() {
 
         val defaultLocation = "Россия" // default location based on your ip
 
         val api = YandexWeatherStep.getWeather()
-        val response = api.getWeatherPrediction(key = KEY).execute()
-        val body = response.body()
+        val response = api.getWeatherPrediction().execute()
+        val body = response.body()!!
 
         step("Check the response") {
             step("check default location $defaultLocation")
             assertThat(
                 "country is correct",
-                body!!.geo_object.country.name, equalTo(defaultLocation)
+                body.geo_object.country.name, equalTo(defaultLocation)
             )
         }
     }
 
-    @DisplayName("Test-002")
+    @DisplayName("Default location based on your ip for EN")
     @Test
-    @Issue("Weather project 002")
-    @Description("Default location based on your ip for EN")
+    @Description("Prediction in english language")
     @Severity(NORMAL)
     fun getWeatherPredictionDefaultLocationEn() {
 
@@ -54,22 +50,21 @@ class WeatherHandlerTest {
         )
 
         val api = YandexWeatherStep.getWeather()
-        val response = api.getWeatherPrediction(key = KEY, params = params).execute()
-        val body = response.body()
+        val response = api.getWeatherPrediction(params = params).execute()
+        val body = response.body()!!
 
         step("Check the response") {
             step("check default location $defaultLocation")
             assertThat(
                 "country is correct",
-                body!!.geo_object.country.name, equalTo(defaultLocation)
+                body.geo_object.country.name, equalTo(defaultLocation)
             )
         }
     }
 
-    @DisplayName("Test-003")
+    @DisplayName("Location based on Moscow latitude and longitude")
     @Test
-    @Issue("Weather project 003")
-    @Description("Location based on Moscow latitude and longitude")
+    @Description("We pass coordinates of Moscow to get prediction for this city")
     @Severity(NORMAL)
     fun getWeatherPredictionForMoscow() {
 
@@ -81,22 +76,21 @@ class WeatherHandlerTest {
         )
 
         val api = YandexWeatherStep.getWeather()
-        val response = api.getWeatherPrediction(key = KEY, params = params).execute()
-        val body = response.body()
+        val response = api.getWeatherPrediction(params = params).execute()
+        val body = response.body()!!
 
         step("Check the response") {
             step("check province name $cityName")
             assertThat(
                 "province name is correct",
-                body!!.geo_object.province.name, equalTo(cityName)
+                body.geo_object.province.name, equalTo(cityName)
             )
         }
     }
 
-    @DisplayName("Test-004")
+    @DisplayName("Weather prediction for one day only")
     @Test
-    @Issue("Weather project 004")
-    @Description("Weather prediction for one day only")
+    @Description("We limit prediction with only one day")
     @Severity(NORMAL)
     fun getWeatherPredictionWithLimitOne() {
 
@@ -105,21 +99,20 @@ class WeatherHandlerTest {
         )
 
         val api = YandexWeatherStep.getWeather()
-        val response = api.getWeatherPrediction(key = KEY, params = params).execute()
-        val body = response.body()
+        val response = api.getWeatherPrediction(params = params).execute()
+        val body = response.body()!!
 
         step("Check the response") {
             assertThat(
                 "forecast only for one day",
-                body!!.forecasts.size, equalTo(1)
+                body.forecasts.size, equalTo(1)
             )
         }
     }
 
-    @DisplayName("Test-005")
+    @DisplayName("Weather prediction for more than one day")
     @Test
-    @Issue("Weather project 005")
-    @Description("Weather prediction for more then one day")
+    @Description("We try to get prediction for more than one day for example 3")
     @Severity(NORMAL)
     fun getWeatherPredictionWithForThreeDays() {
 
@@ -128,21 +121,20 @@ class WeatherHandlerTest {
         )
 
         val api = YandexWeatherStep.getWeather()
-        val response = api.getWeatherPrediction(key = KEY, params = params).execute()
-        val body = response.body()
+        val response = api.getWeatherPrediction(params = params).execute()
+        val body = response.body()!!
 
         step("Check the response") {
             assertThat(
-                "forecast for more then 1 day",
-                body!!.forecasts.size, equalTo(3)
+                "forecast for more than 1 day",
+                body.forecasts.size, equalTo(3)
             )
         }
     }
 
-    @DisplayName("Test-006")
+    @DisplayName("Weather prediction for one day with hours")
     @Test
-    @Issue("Weather project 006")
-    @Description("Weather prediction for one day with hours")
+    @Description("We try to get prediction for one day for every hour")
     @Severity(NORMAL)
     fun getWeatherPredictionOneDayWithHours() {
 
@@ -151,23 +143,25 @@ class WeatherHandlerTest {
             "hours" to "true"
         )
 
+        val currentDate = LocalDate.now().toString()
+
         val api = YandexWeatherStep.getWeather()
-        val response = api.getWeatherPrediction(key = KEY, params = params).execute()
-        val body = response.body()
+        val response = api.getWeatherPrediction(params = params).execute()
+        val body = response.body()!!
 
         step("Check the response") {
             assertAll("check forecast data",
-                { assertThat("forecast only for one day", body!!.forecasts.size, equalTo(1)) },
-                { assertThat("forecast contains 24 hours", body!!.forecasts[0].hours.size, equalTo(24))}
+                { assertThat("forecast only for one day", body.forecasts.size, equalTo(1)) },
+                { assertThat("forecast contains 24 hours", body.forecasts[0].hours.size, equalTo(24))},
+                { assertThat("forecast for today", body.forecasts[0].date, equalTo(currentDate))}
 
             )
         }
     }
 
-    @DisplayName("Test-007")
+    @DisplayName("Weather prediction for one day without hours")
     @Test
-    @Issue("Weather project 007")
-    @Description("Weather prediction for one day without hours")
+    @Description("We try to get prediction for one day without hours")
     @Severity(NORMAL)
     fun getWeatherPredictionOneDayWithoutHours() {
 
@@ -177,14 +171,13 @@ class WeatherHandlerTest {
         )
 
         val api = YandexWeatherStep.getWeather()
-        val response = api.getWeatherPrediction(key = KEY, params = params).execute()
-        val body = response.body()
+        val response = api.getWeatherPrediction(params = params).execute()
+        val body = response.body()!!
 
         step("Check the response") {
             assertAll("check forecast data",
-                { assertThat("forecast only for one day", body!!.forecasts.size, equalTo(1)) },
-                { assertThat("forecast doesn't  contain hours", body!!.forecasts[0].hours.isNullOrEmpty())}
-
+                { assertThat("forecast only for one day", body.forecasts.size, equalTo(1)) },
+                { assertThat("forecast doesn't  contain hours", body.forecasts[0].hours.isNullOrEmpty())}
             )
         }
     }
